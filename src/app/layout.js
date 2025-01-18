@@ -1,10 +1,10 @@
-import { Gowun_Dodum } from "next/font/google";
+import { Roboto } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider"
 
 import "./globals.css";
 
-const gowun_dodum = Gowun_Dodum({
-	variable: "--font-gowun_dodum",
+const roboto = Roboto({
+	variable: "--font-roboto",
 	subsets: ["latin"],
 	weight: ['400']
 });
@@ -18,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
 	return (
 		<html lang="en">
-			<body className={`${gowun_dodum.variable} antialiased`}>
+			<body className={`${roboto.variable} antialiased`}>
 				<ThemeProvider attribute="class" defaultTheme="dark" enableSystem >
 					{children}
 				</ThemeProvider>

@@ -5,3 +5,8 @@
     align-items: center;
     height: 100vh;
 }
+
+.btn-icon{
+    border-radius: 100%;
+    width: 2rem;
+}
