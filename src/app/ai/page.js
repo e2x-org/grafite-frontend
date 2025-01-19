@@ -23,7 +23,7 @@ import { func } from "prop-types"
 export default function DropdownMenuCheckboxes() {
     const [mode, setMode] = React.useState("jee")
     const [chats, setChats] = React.useState({})
-    const [currentChat, setCurrentChat] = React.useState("ajksh")
+    const [currentChat, setCurrentChat] = React.useState()
     const [chatsContent, setchatsContent] = React.useState([
         { user: true, text: "Hello" },
         { user: false, text: "Hi" },
@@ -58,21 +58,21 @@ export default function DropdownMenuCheckboxes() {
         loadChatContent()
     }
 
-    function loadChatContent() {
+    function loadChatContent(chat_id = currentChat) {
         loadChats()
-        // fetch chat content from local storage
-        let chatsContent = localStorage.getItem(`chats-${currentChat}`)
+        let chatsContent = localStorage.getItem(`chats-${chat_id}`)
         if (!chatsContent) {
             return
         } else {
             chatsContent = JSON.parse(chatsContent)
         }
         setchatsContent(chatsContent)
+        localStorage.setItem('currentChat', chat_id)
     }
 
-    function saveChatContent() {
+    function saveChatContent(chats_t = chatsContent) {
         saveChats()
-        localStorage.setItem(`chats-${currentChat}`, JSON.stringify(chatsContent))
+        localStorage.setItem(`chats-${currentChat}`, JSON.stringify(chats_t))
     }
 
     function addChat(text, user) {
@@ -80,6 +80,7 @@ export default function DropdownMenuCheckboxes() {
         setchatsContent([...chatsContent, { text, user }])
         const chat = document.querySelector(".chats")
         chat.scrollTop = chat.scrollHeight
+        saveChatContent([...chatsContent, { text, user }])
     } 
 
     function queryAI(query) {
@@ -114,7 +115,7 @@ export default function DropdownMenuCheckboxes() {
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={currentChat} onValueChange={setCurrentChat}>
                             {Object.keys(chats).map((chat, index) => (
-                                <DropdownMenuRadioItem key={index} value={chat}>{chats[chat]}</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem key={index} value={chat} onClick={()=> {console.log(`${chat}: ${chats[chat]}`); loadChatContent(chat)}} >{chats[chat]}</DropdownMenuRadioItem>
                             ))}
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
