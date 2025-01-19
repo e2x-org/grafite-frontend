@@ -4,6 +4,8 @@ import * as React from "react"
 
 import "../styles/gpt.css"
 
+import Head from "next/head"
+import Script from "next/script"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -16,7 +18,9 @@ import {
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
 import Bubble from "@/components/ui/chat-bubble"
-import { func } from "prop-types"
+import { remark } from 'remark';
+import html from 'remark-html';
+import Parser from 'html-react-parser';
 
 
 
@@ -50,7 +54,6 @@ export default function DropdownMenuCheckboxes() {
             chatss = JSON.parse(chatss)
         }
         setChats(chatss)
-        console.log(chatss)
     }
 
     function saveChats(chats_t = chats) {
@@ -82,11 +85,25 @@ export default function DropdownMenuCheckboxes() {
         saveChatContent([...chatsContent, { text, user }])
     } 
 
-    function queryAI(query) {
-        
+    async function queryAI(query) {
+        const payload = {
+            "query": query,
+            "dataset": mode,
+            "conversation": chatsContent
+        }
+        const response = await fetch("/api/ai", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+        let data = await response.json()
+        const result = await remark().use(html).process(data.answer)
+        return result.value
     }
 
-    function processQuery() {
+    async function processQuery() {
         const text = document.querySelector(".input input").value
         if (!text) return
         if (Date.now() - lastMsgTime < 5000) {
@@ -95,6 +112,13 @@ export default function DropdownMenuCheckboxes() {
         }
         addChat(text, true)
         document.querySelector(".input input").value = ""
+        let ans = await queryAI(text)
+
+        setchatsContent([...chatsContent, { text: text, user: true }, { text: ans, user: false }])
+        const chat = document.querySelector(".chats")
+        chat.scrollTop = chat.scrollHeight
+        saveChatContent([...chatsContent, { text: text, user: true }, { text: ans, user: false }])
+
         setLastMsgTime(Date.now())
     }
 
@@ -103,6 +127,18 @@ export default function DropdownMenuCheckboxes() {
     }, [])
 
     return (
+        <>
+        <Head>
+            <title>GrafiteAI</title>
+            <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        </Head>
+        
+        <Script
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+            onLoad={() =>
+            console.log(`script loaded correctly, window.FB has been populated`)
+            }
+        />
         <div className="grid grid-rows-[auto,1fr] h-screen">
             <div className="p-4 grid grid-cols-5 text-center">
                 <DropdownMenu>
@@ -113,7 +149,6 @@ export default function DropdownMenuCheckboxes() {
                         <DropdownMenuItem onClick={newChat} >New Chat</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={currentChat} onValueChange={setCurrentChat}>
-                            {console.log(chats)}
                             {Object.keys(chats).map((chat, index) => (
                                 <DropdownMenuRadioItem key={index} value={chat} onClick={()=> {console.log(`${chat}: ${chats[chat]}`); loadChatContent(chat)}} >{chats[chat]}</DropdownMenuRadioItem>
                             ))}
@@ -136,7 +171,7 @@ export default function DropdownMenuCheckboxes() {
             <div className="grid p-4 grid-rows-[1fr,auto] overflow-hidden">
                 <div className="chats overflow-y-scroll p-4">
                     {chatsContent.map((chat, index) => (
-                        <Bubble key={index} user={chat.user}>{chat.text}</Bubble>
+                        <Bubble key={index} user={chat.user}>{Parser(chat.text)}</Bubble>
                     ))}
                 </div>
                 <div className="input grid gap-4 grid-cols-[1fr,auto]">
@@ -145,5 +180,6 @@ export default function DropdownMenuCheckboxes() {
                 </div>
             </div>
         </div>
+        </>
     )
 }
