@@ -113,14 +113,25 @@ export default function DropdownMenuCheckboxes() {
         }
         addChat(text, true)
         document.querySelector(".input input").value = ""
+        const chat = document.querySelector(".chats")
+        setTimeout(() => {
+            chat.scrollTop = chat.scrollHeight
+        }, 500)
         let ans = await queryAI(text)
 
         setchatsContent([...chatsContent, { text: text, user: true }, { text: ans, user: false }])
-        const chat = document.querySelector(".chats")
         saveChatContent([...chatsContent, { text: text, user: true }, { text: ans, user: false }])
         
-        chat.scrollTop = chat.scrollHeight
+        setTimeout(() => {
+            chat.scrollTop = chat.scrollHeight
+        }, 500)
         setLastMsgTime(Date.now())
+    }
+
+    function handleKeyDown(e) {
+        if (e.key === "Enter") {
+            processQuery()
+        }
     }
 
     React.useEffect(() => {
@@ -176,7 +187,7 @@ export default function DropdownMenuCheckboxes() {
                     ))}
                 </div>
                 <div className="input grid gap-4 grid-cols-[1fr,auto]">
-                    <Input type="text" className="w-full h-12 border-2 border-gray-500 rounded-md p-4" />
+                    <Input type="text" className="w-full h-12 border-2 border-gray-500 rounded-md p-4" onKeyDown={handleKeyDown} />
                     <Button variant="outline" className="h-12 bg-[#111111]" onClick={processQuery}>Send <SendHorizontal /></Button>
                 </div>
             </div>
