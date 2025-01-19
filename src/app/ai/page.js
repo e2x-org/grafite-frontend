@@ -17,23 +17,35 @@ import {
     DropdownMenuRadioItem,
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+
 import Bubble from "@/components/ui/chat-bubble"
 
 import { remark } from 'remark';
 import html from 'remark-html';
 import Parser from 'html-react-parser';
 import { ChevronDown, SendHorizontal } from "lucide-react"
+import { func } from "prop-types"
 
 
 
 export default function DropdownMenuCheckboxes() {
     const [mode, setMode] = React.useState("jee")
-    const [chats, setChats] = React.useState({"aaaaaaa": "Chat 1"})
+    const [chats, setChats] = React.useState({"aaaaa": "Chat 1"})
     const [currentChat, setCurrentChat] = React.useState("aaaaa")
     const [chatsContent, setchatsContent] = React.useState([])
 
     const [lastMsgTime, setLastMsgTime] = React.useState(0)
 
+    const [emailDialogOpen, setEmailDialogOpen] = React.useState(false)
 
     function newChat() {
         const chatName = prompt("Enter chat name")
@@ -140,8 +152,23 @@ export default function DropdownMenuCheckboxes() {
         }
     }
 
+    function sendEmail() {
+        const email = document.querySelector("#email").value
+        fetch(`/api/email?email=${email}`)
+        localStorage.setItem("email-submitted", "true")
+        setEmailDialogOpen(false)
+    }
+
+    function dialogHandler() {
+        setEmailDialogOpen(false)
+        localStorage.setItem("email-submitted", "true")
+    }
+
     React.useEffect(() => {
         loadChats()
+        if (localStorage.getItem("email-submitted") !== "true") {
+            setEmailDialogOpen(true)
+        }
     }, [])
 
     return (
@@ -157,6 +184,25 @@ export default function DropdownMenuCheckboxes() {
             console.log(`script loaded correctly, window.FB has been populated`)
             }
         />
+        <Dialog open={emailDialogOpen} onOpenChange={dialogHandler}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Stay Up To Date!</DialogTitle>
+                    <DialogDescription>
+                        Sign up for our newsletter to get the latest updates! (We promise not to spam you :3)
+                    </DialogDescription>
+                </DialogHeader>
+                <Input
+                id="email"
+                type="email"
+                className="col-span-3"
+                />
+                <DialogFooter>
+                    <Button onClick={() => (window.open("https://discord.gg/unCVYP8YtV"))}>Join Discord</Button>
+                    <Button type="submit" onClick={sendEmail}>Sign Up</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
         <div className="grid grid-rows-[auto,1fr] h-screen">
             <div className="p-4 grid grid-cols-5 text-center">
                 <DropdownMenu>
