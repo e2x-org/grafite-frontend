@@ -81,8 +81,8 @@ export default function DropdownMenuCheckboxes() {
         if (!text) return
         setchatsContent([...chatsContent, { text, user }])
         const chat = document.querySelector(".chats")
-        chat.scrollTop = chat.scrollHeight
         saveChatContent([...chatsContent, { text, user }])
+        chat.scrollTop = chat.scrollHeight
     } 
 
     async function queryAI(query) {
@@ -116,9 +116,9 @@ export default function DropdownMenuCheckboxes() {
 
         setchatsContent([...chatsContent, { text: text, user: true }, { text: ans, user: false }])
         const chat = document.querySelector(".chats")
-        chat.scrollTop = chat.scrollHeight
         saveChatContent([...chatsContent, { text: text, user: true }, { text: ans, user: false }])
-
+        
+        chat.scrollTop = chat.scrollHeight
         setLastMsgTime(Date.now())
     }
 

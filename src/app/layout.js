@@ -1,11 +1,11 @@
-import { Roboto } from "next/font/google";
+import { Reddit_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider"
 
 import Parser from 'html-react-parser';
 
 import "./globals.css";
 
-const roboto = Roboto({
+const reddit_sans = Reddit_Sans({
 	variable: "--font-roboto",
 	subsets: ["latin"],
 	weight: ['400']
@@ -20,7 +20,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
 	return (
 		<html lang="en">
-			<body className={`${roboto.variable} antialiased`}>
+			<body className={`${reddit_sans.variable} antialiased`}>
 				{Parser(`<script type="text/x-mathjax-config">
 						MathJax = {
 							tex: {
