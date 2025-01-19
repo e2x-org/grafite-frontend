@@ -100,8 +100,14 @@ export default function DropdownMenuCheckboxes() {
             body: JSON.stringify(payload)
         })
         let data = await response.json()
-        const result = await remark().use(html).process(data.answer)
-        return result.value
+        let result = await remark().use(html).process(data.answer)
+        result = result.value
+        result += "<br><h2>Similar Question:</h2><ul>"
+        data.similar_questions.forEach((question) => {
+            result += `<li><b>Q:</b>${question.question}<br><b>A:</b> ${question.answer}</li><br>`
+        })
+        result += "</ul>"
+        return result
     }
 
     async function processQuery() {
@@ -186,7 +192,7 @@ export default function DropdownMenuCheckboxes() {
                         <Bubble key={index} user={chat.user}>{Parser(chat.text)}</Bubble>
                     ))}
                 </div>
-                <div className="input grid gap-4 grid-cols-[1fr,auto]">
+                <div className="input grid gap-4 grid-cols-[1fr,auto] pt-3">
                     <Input type="text" className="w-full h-12 border-2 border-gray-500 rounded-md p-4" onKeyDown={handleKeyDown} />
                     <Button variant="outline" className="h-12 bg-[#111111]" onClick={processQuery}>Send <SendHorizontal /></Button>
                 </div>
