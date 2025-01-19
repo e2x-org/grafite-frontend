@@ -1,11 +1,11 @@
 "use client"
 
 import * as React from "react"
+import Head from "next/head"
+import Script from "next/script"
 
 import "../styles/gpt.css"
 
-import Head from "next/head"
-import Script from "next/script"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -18,9 +18,11 @@ import {
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
 import Bubble from "@/components/ui/chat-bubble"
+
 import { remark } from 'remark';
 import html from 'remark-html';
 import Parser from 'html-react-parser';
+import { ChevronDown, SendHorizontal } from "lucide-react"
 
 
 
@@ -46,7 +48,6 @@ export default function DropdownMenuCheckboxes() {
 
     function loadChats() {
         // fetch chats from local storage
-        console.log(chats)
         let chatss = localStorage.getItem("chats")
         if (!chatss) {
             chatss = saveChats()
@@ -143,7 +144,7 @@ export default function DropdownMenuCheckboxes() {
             <div className="p-4 grid grid-cols-5 text-center">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline"><b>Chats</b></Button>
+                        <Button className='bg-[#111111]' variant="outline"><b>Chats</b> <ChevronDown /></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="">
                         <DropdownMenuItem onClick={newChat} >New Chat</DropdownMenuItem>
@@ -155,10 +156,10 @@ export default function DropdownMenuCheckboxes() {
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <h1 className="col-span-3 text-4xl">GrafiteAI</h1>
+                <h1 className="col-span-3 text-4xl"><b>Grafite</b>AI</h1>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{mode.toUpperCase()}</Button>
+                        <Button className='bg-[#111111]' variant="outline">{mode.toUpperCase()} <ChevronDown /></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="">
                         <DropdownMenuRadioGroup value={mode} onValueChange={setMode}>
@@ -176,7 +177,7 @@ export default function DropdownMenuCheckboxes() {
                 </div>
                 <div className="input grid gap-4 grid-cols-[1fr,auto]">
                     <Input type="text" className="w-full h-12 border-2 border-gray-500 rounded-md p-4" />
-                    <Button variant="outline" className="h-12" onClick={processQuery}>Send</Button>
+                    <Button variant="outline" className="h-12 bg-[#111111]" onClick={processQuery}>Send <SendHorizontal /></Button>
                 </div>
             </div>
         </div>
