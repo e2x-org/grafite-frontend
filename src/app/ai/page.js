@@ -22,30 +22,12 @@ import { func } from "prop-types"
 
 export default function DropdownMenuCheckboxes() {
     const [mode, setMode] = React.useState("jee")
-    const [chats, setChats] = React.useState({})
-    const [currentChat, setCurrentChat] = React.useState()
-    const [chatsContent, setchatsContent] = React.useState([
-        { user: true, text: "Hello" },
-        { user: false, text: "Hi" },
-        { user: true, text: "How are you?" }
-    ])
+    const [chats, setChats] = React.useState({"aaaaaaa": "Chat 1"})
+    const [currentChat, setCurrentChat] = React.useState("aaaaa")
+    const [chatsContent, setchatsContent] = React.useState([])
 
     const [lastMsgTime, setLastMsgTime] = React.useState(0)
 
-    function loadChats() {
-        // fetch chats from local storage
-        let chats = localStorage.getItem("chats")
-        if (!chats) {
-            return
-        } else {
-            chats = JSON.parse(chats)
-        }
-        setChats(chats)
-    }
-
-    function saveChats(chats_t = chats) {
-        localStorage.setItem("chats", JSON.stringify(chats_t))
-    }
 
     function newChat() {
         const chatName = prompt("Enter chat name")
@@ -55,7 +37,25 @@ export default function DropdownMenuCheckboxes() {
         saveChats({ ...chats, [chatId]: chatName })
         localStorage.setItem(`chats-${chatId}`, JSON.stringify([]))
         setCurrentChat(chatId)
-        loadChatContent()
+        loadChatContent(chatId)
+    }
+
+    function loadChats() {
+        // fetch chats from local storage
+        console.log(chats)
+        let chatss = localStorage.getItem("chats")
+        if (!chatss) {
+            chatss = saveChats()
+        } else {
+            chatss = JSON.parse(chatss)
+        }
+        setChats(chatss)
+        console.log(chatss)
+    }
+
+    function saveChats(chats_t = chats) {
+        localStorage.setItem("chats", JSON.stringify(chats_t))
+        return chats_t
     }
 
     function loadChatContent(chat_id = currentChat) {
@@ -67,7 +67,6 @@ export default function DropdownMenuCheckboxes() {
             chatsContent = JSON.parse(chatsContent)
         }
         setchatsContent(chatsContent)
-        localStorage.setItem('currentChat', chat_id)
     }
 
     function saveChatContent(chats_t = chatsContent) {
@@ -114,6 +113,7 @@ export default function DropdownMenuCheckboxes() {
                         <DropdownMenuItem onClick={newChat} >New Chat</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={currentChat} onValueChange={setCurrentChat}>
+                            {console.log(chats)}
                             {Object.keys(chats).map((chat, index) => (
                                 <DropdownMenuRadioItem key={index} value={chat} onClick={()=> {console.log(`${chat}: ${chats[chat]}`); loadChatContent(chat)}} >{chats[chat]}</DropdownMenuRadioItem>
                             ))}
@@ -123,7 +123,7 @@ export default function DropdownMenuCheckboxes() {
                 <h1 className="col-span-3 text-4xl">GrafiteAI</h1>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{mode}</Button>
+                        <Button variant="outline">{mode.toUpperCase()}</Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="">
                         <DropdownMenuRadioGroup value={mode} onValueChange={setMode}>
