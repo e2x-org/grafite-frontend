@@ -16,16 +16,13 @@ import {
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
 import Bubble from "@/components/ui/chat-bubble"
+import { func } from "prop-types"
 
 
 
 export default function DropdownMenuCheckboxes() {
     const [mode, setMode] = React.useState("jee")
-    const [chats, setChats] = React.useState({
-        "ajksh": "Chat One",
-        "ghjgy": "Chat Two",
-        "cvbcb": "Chat Three"
-    })
+    const [chats, setChats] = React.useState({})
     const [currentChat, setCurrentChat] = React.useState("ajksh")
     const [chatsContent, setchatsContent] = React.useState([
         { user: true, text: "Hello" },
@@ -43,7 +40,39 @@ export default function DropdownMenuCheckboxes() {
         } else {
             chats = JSON.parse(chats)
         }
-        setchatsContent(chats[currentChat])
+        setChats(chats)
+    }
+
+    function saveChats(chats_t = chats) {
+        localStorage.setItem("chats", JSON.stringify(chats_t))
+    }
+
+    function newChat() {
+        const chatName = prompt("Enter chat name")
+        if (!chatName) return
+        const chatId = Math.random().toString(36).substring(7)
+        setChats({ ...chats, [chatId]: chatName })
+        saveChats({ ...chats, [chatId]: chatName })
+        localStorage.setItem(`chats-${chatId}`, JSON.stringify([]))
+        setCurrentChat(chatId)
+        loadChatContent()
+    }
+
+    function loadChatContent() {
+        loadChats()
+        // fetch chat content from local storage
+        let chatsContent = localStorage.getItem(`chats-${currentChat}`)
+        if (!chatsContent) {
+            return
+        } else {
+            chatsContent = JSON.parse(chatsContent)
+        }
+        setchatsContent(chatsContent)
+    }
+
+    function saveChatContent() {
+        saveChats()
+        localStorage.setItem(`chats-${currentChat}`, JSON.stringify(chatsContent))
     }
 
     function addChat(text, user) {
@@ -69,6 +98,10 @@ export default function DropdownMenuCheckboxes() {
         setLastMsgTime(Date.now())
     }
 
+    React.useEffect(() => {
+        loadChats()
+    }, [])
+
     return (
         <div className="grid grid-rows-[auto,1fr] h-screen">
             <div className="p-4 grid grid-cols-5 text-center">
@@ -77,18 +110,8 @@ export default function DropdownMenuCheckboxes() {
                         <Button variant="outline"><b>Chats</b></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="">
-                        {/* <DropdownMenuItem>
-                            Chat 1
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            Chat 2
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            Chat 3
-                        </DropdownMenuItem> */}
-                        {/* {Object.keys(chats).map((chat, index) => (
-                            <DropdownMenuRadioItem key={index}>{chats[chat]}</DropdownMenuRadioItem>
-                        ))} */}
+                        <DropdownMenuItem onClick={newChat} >New Chat</DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={currentChat} onValueChange={setCurrentChat}>
                             {Object.keys(chats).map((chat, index) => (
                                 <DropdownMenuRadioItem key={index} value={chat}>{chats[chat]}</DropdownMenuRadioItem>
