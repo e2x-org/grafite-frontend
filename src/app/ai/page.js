@@ -1,11 +1,11 @@
 "use client"
 
 import * as React from "react"
+import Head from "next/head"
+import Script from "next/script"
 
 import "../styles/gpt.css"
 
-import Head from "next/head"
-import Script from "next/script"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -17,21 +17,35 @@ import {
     DropdownMenuRadioItem,
     DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+
 import Bubble from "@/components/ui/chat-bubble"
+
 import { remark } from 'remark';
 import html from 'remark-html';
 import Parser from 'html-react-parser';
+import { ChevronDown, SendHorizontal } from "lucide-react"
+import { func } from "prop-types"
 
 
 
 export default function DropdownMenuCheckboxes() {
     const [mode, setMode] = React.useState("jee")
-    const [chats, setChats] = React.useState({"aaaaaaa": "Chat 1"})
+    const [chats, setChats] = React.useState({"aaaaa": "Chat 1"})
     const [currentChat, setCurrentChat] = React.useState("aaaaa")
     const [chatsContent, setchatsContent] = React.useState([])
 
     const [lastMsgTime, setLastMsgTime] = React.useState(0)
 
+    const [emailDialogOpen, setEmailDialogOpen] = React.useState(false)
 
     function newChat() {
         const chatName = prompt("Enter chat name")
@@ -46,7 +60,6 @@ export default function DropdownMenuCheckboxes() {
 
     function loadChats() {
         // fetch chats from local storage
-        console.log(chats)
         let chatss = localStorage.getItem("chats")
         if (!chatss) {
             chatss = saveChats()
@@ -81,8 +94,8 @@ export default function DropdownMenuCheckboxes() {
         if (!text) return
         setchatsContent([...chatsContent, { text, user }])
         const chat = document.querySelector(".chats")
-        chat.scrollTop = chat.scrollHeight
         saveChatContent([...chatsContent, { text, user }])
+        chat.scrollTop = chat.scrollHeight
     } 
 
     async function queryAI(query) {
@@ -99,8 +112,14 @@ export default function DropdownMenuCheckboxes() {
             body: JSON.stringify(payload)
         })
         let data = await response.json()
-        const result = await remark().use(html).process(data.answer)
-        return result.value
+        let result = await remark().use(html).process(data.answer)
+        result = result.value
+        result += "<br><h2>Similar Question:</h2><ul>"
+        data.similar_questions.forEach((question) => {
+            result += `<li><b>Q:</b>${question.question}<br><b>A:</b> ${question.answer}</li><br>`
+        })
+        result += "</ul>"
+        return result
     }
 
     async function processQuery() {
@@ -112,18 +131,44 @@ export default function DropdownMenuCheckboxes() {
         }
         addChat(text, true)
         document.querySelector(".input input").value = ""
+        const chat = document.querySelector(".chats")
+        setTimeout(() => {
+            chat.scrollTop = chat.scrollHeight
+        }, 500)
         let ans = await queryAI(text)
 
         setchatsContent([...chatsContent, { text: text, user: true }, { text: ans, user: false }])
-        const chat = document.querySelector(".chats")
-        chat.scrollTop = chat.scrollHeight
         saveChatContent([...chatsContent, { text: text, user: true }, { text: ans, user: false }])
-
+        
+        setTimeout(() => {
+            chat.scrollTop = chat.scrollHeight
+        }, 500)
         setLastMsgTime(Date.now())
+    }
+
+    function handleKeyDown(e) {
+        if (e.key === "Enter") {
+            processQuery()
+        }
+    }
+
+    function sendEmail() {
+        const email = document.querySelector("#email").value
+        fetch(`/api/email?email=${email}`)
+        localStorage.setItem("email-submitted", "true")
+        setEmailDialogOpen(false)
+    }
+
+    function dialogHandler() {
+        setEmailDialogOpen(false)
+        localStorage.setItem("email-submitted", "true")
     }
 
     React.useEffect(() => {
         loadChats()
+        if (localStorage.getItem("email-submitted") !== "true") {
+            setEmailDialogOpen(true)
+        }
     }, [])
 
     return (
@@ -139,11 +184,30 @@ export default function DropdownMenuCheckboxes() {
             console.log(`script loaded correctly, window.FB has been populated`)
             }
         />
+        <Dialog open={emailDialogOpen} onOpenChange={dialogHandler}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Stay Up To Date!</DialogTitle>
+                    <DialogDescription>
+                        Sign up for our newsletter to get the latest updates! (We promise not to spam you :3)
+                    </DialogDescription>
+                </DialogHeader>
+                <Input
+                id="email"
+                type="email"
+                className="col-span-3"
+                />
+                <DialogFooter>
+                    <Button onClick={() => (window.open("https://discord.gg/unCVYP8YtV"))}>Join Discord</Button>
+                    <Button type="submit" onClick={sendEmail}>Sign Up</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
         <div className="grid grid-rows-[auto,1fr] h-screen">
             <div className="p-4 grid grid-cols-5 text-center">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline"><b>Chats</b></Button>
+                        <Button className='bg-[#111111]' variant="outline"><b>Chats</b> <ChevronDown /></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="">
                         <DropdownMenuItem onClick={newChat} >New Chat</DropdownMenuItem>
@@ -155,10 +219,10 @@ export default function DropdownMenuCheckboxes() {
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <h1 className="col-span-3 text-4xl">GrafiteAI</h1>
+                <h1 className="col-span-3 text-4xl"><b>Grafite</b>AI</h1>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{mode.toUpperCase()}</Button>
+                        <Button className='bg-[#111111]' variant="outline">{mode.toUpperCase()} <ChevronDown /></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="">
                         <DropdownMenuRadioGroup value={mode} onValueChange={setMode}>
@@ -174,9 +238,9 @@ export default function DropdownMenuCheckboxes() {
                         <Bubble key={index} user={chat.user}>{Parser(chat.text)}</Bubble>
                     ))}
                 </div>
-                <div className="input grid gap-4 grid-cols-[1fr,auto]">
-                    <Input type="text" className="w-full h-12 border-2 border-gray-500 rounded-md p-4" />
-                    <Button variant="outline" className="h-12" onClick={processQuery}>Send</Button>
+                <div className="input grid gap-4 grid-cols-[1fr,auto] pt-3">
+                    <Input type="text" className="w-full h-12 border-2 border-gray-500 rounded-md p-4" onKeyDown={handleKeyDown} />
+                    <Button variant="outline" className="h-12 bg-[#111111]" onClick={processQuery}>Send <SendHorizontal /></Button>
                 </div>
             </div>
         </div>
